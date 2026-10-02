@@ -1,9 +1,9 @@
 {
-  "uuid": "claude-status@oakz.org",
+  "uuid": "claude-status-local@jmm",
   "gettext-domain": "claude-status@oakz.org",
-  "name": "Claude Status",
+  "name": "Claude Status (local)",
   "description": "Shows Claude Code usage (session and weekly limits) in the GNOME top bar.",
   "shell-version": ["45", "46", "47", "48", "49", "50"],
-  "url": "https://github.com/montanhes/claude-status",
+  "url": "https://github.com/jmeickle/claude-status",
   "version": 3
 }

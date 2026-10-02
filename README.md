@@ -1,5 +1,7 @@
 # Claude Status
 
+> Fork of [montanhes/claude-status](https://github.com/montanhes/claude-status) with UUID `claude-status-local@jmm`, so extensions.gnome.org updates to the original don't overwrite it. It ignores user-level Claude settings (an `env.CLAUDE_CODE_OAUTH_TOKEN` there breaks `/usage`) and doesn't save a session per refresh. The gettext domain is unchanged.
+
 GNOME Shell extension showing [Claude Code](https://claude.com/claude-code) usage (`/usage`) in the top bar: current session (5h) and weekly percentage, with countdown to reset.
 
 ![Panel](screenshots/panel.png)
@@ -15,18 +17,23 @@ Clicking the panel opens a detailed dropdown, including live [Claude status](htt
 
 ## How it works
 
-Every 5 minutes the extension runs `claude -p "/usage"` in the background, parses the output (session and weekly percentage plus reset time), and updates the panel. It also polls `status.claude.com` on the same interval and shows a color-coded indicator (green/yellow/orange/red) in the dropdown, linking out to the status page on click.
+Every 5 minutes the extension runs `claude --setting-sources project,local --no-session-persistence -p "/usage"` in the background, parses the output (session and weekly percentage plus reset time), and updates the panel. It also polls `status.claude.com` on the same interval and shows a color-coded indicator (green/yellow/orange/red) in the dropdown, linking out to the status page on click.
 
 If a `/usage` call fails or times out (25s watchdog), it retries with exponential backoff (15s, 30s, 45s... capped at 120s, up to 5 attempts) instead of leaving stale data on screen. No data is sent to third parties; everything runs locally through the Claude Code CLI itself, aside from the status page check.
 
 ## Installation
 
 ```bash
-git clone https://github.com/montanhes/claude-status.git ~/.local/share/gnome-shell/extensions/claude-status@oakz.org
-gnome-extensions enable claude-status@oakz.org
+git clone https://github.com/jmeickle/claude-status.git ~/.local/share/gnome-shell/extensions/claude-status-local@jmm
+gnome-extensions disable claude-status@oakz.org  # if the original is installed
+gnome-extensions enable claude-status-local@jmm
 ```
 
-On Wayland, new extensions are only picked up after logout/login (GNOME Shell doesn't hot-reload). After logging back in, run the `gnome-extensions enable` command above.
+On Wayland, new extensions are only picked up after logout/login (GNOME Shell doesn't hot-reload). To load it without logging out, open Looking Glass (Alt+F2, `lg`) and evaluate:
+
+```js
+(async () => { const m = Main.extensionManager, uuid = 'claude-status-local@jmm'; const ext = m.createExtensionObject(uuid, Gio.File.new_for_path(GLib.get_home_dir() + '/.local/share/gnome-shell/extensions/' + uuid), 2); await m.loadExtension(ext); m.enableExtension(uuid); })()
+```
 
 ## Packaging (EGO submission)
 
