@@ -308,7 +308,7 @@ class ClaudeIndicator extends PanelMenu.Button {
         this._cancellable = new Gio.Cancellable();
         try {
             proc = Gio.Subprocess.new(
-                ['/bin/bash', '-lc', 'claude --setting-sources project,local -p "/usage"'],
+                ['/bin/bash', '-lc', 'claude --setting-sources project,local --no-session-persistence -p "/usage"'],
                 Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE);
         } catch (e) {
             logError(e, 'claude-status: falha ao iniciar subprocess');
