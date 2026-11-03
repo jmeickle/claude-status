@@ -8,6 +8,10 @@ import GObject from 'gi://GObject';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
+// GObject type names are global for the whole shell session; a fresh suffix
+// per module load lets disable/enable re-import an edited file.
+const LOAD_ID = Date.now();
+
 const REFRESH_SECONDS = 300;
 const TICK_SECONDS = 1;
 const BAR_WIDTH = 220;
@@ -79,7 +83,7 @@ function parseWindow(headers, window) {
     };
 }
 
-const UsageCard = GObject.registerClass(
+const UsageCard = GObject.registerClass({GTypeName: `ClaudeStatusUsageCard${LOAD_ID}`},
 class UsageCard extends St.BoxLayout {
     _init(title, gettext) {
         super._init({vertical: true, style_class: 'claude-card', x_expand: true});
@@ -127,7 +131,7 @@ class UsageCard extends St.BoxLayout {
     }
 });
 
-export const ClaudeIndicator = GObject.registerClass(
+export const ClaudeIndicator = GObject.registerClass({GTypeName: `ClaudeStatusIndicator${LOAD_ID}`},
 class ClaudeIndicator extends PanelMenu.Button {
     _init(extension) {
         super._init(0.0, extension.gettext('Claude Status'));
