@@ -114,6 +114,14 @@ class UsageCard extends St.BoxLayout {
         this._resetLabel.set_text(this._('Resets at · %s').replace('%s', resetText));
     }
 
+    setEmpty() {
+        this._pctLabel.set_text('--%');
+        this._pctLabel.set_style('');
+        this._barFill.set_width(0);
+        this._resetLabel.set_text('');
+        this._countdownLabel.set_text('');
+    }
+
     setCountdown(text) {
         this._countdownLabel.set_text(text);
     }
@@ -223,8 +231,10 @@ class ClaudeIndicator extends PanelMenu.Button {
         const now = new Date();
 
         if (this._data) {
-            this._sessionCard.setCountdown(formatCountdown(this._data.session.resetDate, now));
-            this._weekCard.setCountdown(formatCountdown(this._data.week.resetDate, now));
+            if (this._data.session)
+                this._sessionCard.setCountdown(formatCountdown(this._data.session.resetDate, now));
+            if (this._data.week)
+                this._weekCard.setCountdown(formatCountdown(this._data.week.resetDate, now));
         }
 
         if (!this.menu.isOpen)
@@ -275,7 +285,7 @@ class ClaudeIndicator extends PanelMenu.Button {
             const headers = msg.get_response_headers();
             const sessionWindow = parseWindow(headers, '5h');
             const weekWindow = parseWindow(headers, '7d');
-            if (!sessionWindow || !weekWindow) {
+            if (!sessionWindow && !weekWindow) {
                 this._fail(`HTTP ${msg.get_status()} without rate-limit headers`);
                 return;
             }
@@ -284,9 +294,17 @@ class ClaudeIndicator extends PanelMenu.Button {
             this._error = null;
             this._lastUpdate = new Date();
 
-            this._label.set_text(this._panelLabel(`${sessionWindow.pct}%`, `${weekWindow.pct}%`));
-            this._sessionCard.setData(sessionWindow.pct, sessionWindow.resetText);
-            this._weekCard.setData(weekWindow.pct, weekWindow.resetText);
+            this._label.set_text(this._panelLabel(
+                sessionWindow ? `${sessionWindow.pct}%` : '--%',
+                weekWindow ? `${weekWindow.pct}%` : '--%'));
+            if (sessionWindow)
+                this._sessionCard.setData(sessionWindow.pct, sessionWindow.resetText);
+            else
+                this._sessionCard.setEmpty();
+            if (weekWindow)
+                this._weekCard.setData(weekWindow.pct, weekWindow.resetText);
+            else
+                this._weekCard.setEmpty();
             this._tick();
         });
     }
